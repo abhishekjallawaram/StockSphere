@@ -1,0 +1,6 @@
+fastapi
+motor
+yahooquery
+uvicorn
+pymongo
+python-dotenv
