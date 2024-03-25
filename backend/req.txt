@@ -39,3 +39,4 @@ tzdata==2024.1
 urllib3==2.2.1
 uvicorn==0.29.0
 yahooquery==2.3.7
+yfinance
