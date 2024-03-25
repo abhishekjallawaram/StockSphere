@@ -2,32 +2,15 @@ from fastapi import FastAPI
 from app.routes import agents, customers, stocks, stock_history, transactions
 from app.database.mongo import MongoDB
 from fastapi.middleware.cors import CORSMiddleware
-from app.utils import yahoo_finance
+
 from app.routes import auth
-from datetime import datetime
-import asyncio
+
 
 app = FastAPI()
 
-
-async def update_recent_data():
-    while True:
-        current_date = datetime.now()
-        await yahoo_finance.fetch_and_update_stock_data()
-        await yahoo_finance.fetch_and_store_historical_data()
-        await asyncio.sleep(300)  
-
-
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(update_recent_data())
-    
-    
-    
-    
 app.include_router(agents.router, prefix="/agents", tags=["agents"])
 # app.include_router(customers.router, prefix="/customers", tags=["customers"])
-app.include_router(stocks.router, prefix="/stocks", tags=["stocks"])
+# app.include_router(stocks.router, prefix="/stocks", tags=["stocks"])
 # app.include_router(stock_history.router, prefix="/stock-history", tags=["stock-history"])
 # app.include_router(transactions.router, prefix="/transactions", tags=["transactions"])
 
@@ -40,7 +23,7 @@ app.add_middleware(
 )
 
 
-# app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
+app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
 
 
 @app.get("/api/healthchecker")

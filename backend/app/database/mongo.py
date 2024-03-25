@@ -25,10 +25,6 @@ async def get_collections():
         "stock_history": db.stock_history,
         "transactions": db.transactions,
     }
-    await collections["stocks"].create_index([("stock_id", pymongo.ASCENDING)], unique=True)
-    await collections["stocks"].create_index([("Company_ticker", pymongo.ASCENDING)], unique=True)
-    
-    await collections["agents"].create_index([("agent_id", pymongo.ASCENDING)], unique=True)
     return collections
 
 async def get_user():
