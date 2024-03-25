@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict, BaseConfig
+from pydantic import BaseModel, Field , conint
 from typing import Optional
 from bson import ObjectId
 
@@ -10,23 +10,28 @@ class PyObjectId(ObjectId):
     @classmethod
     def validate(cls, v):
         if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
+            raise ValueError(f"Invalid ObjectId: {v}")
+        return str(ObjectId(v))
+    
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
 
 class Agent(BaseModel):
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    agent_id: conint(ge=0, le=999999)
     name: str
     contact: str
     level: str
 
-    class Config(BaseConfig):
-        allow_population_by_field_name = True
+    class Config:
+        populate_by_name = True
         arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
 
+    # class Config:
+    #     allow_population_by_field_name = True
+    #     arbitrary_types_allowed = True
+        
 # class Customer(BaseModel):
 #     id: Optional[PyObjectId] = None
 #     name: str

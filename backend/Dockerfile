@@ -20,4 +20,4 @@ EXPOSE 8000
 ENV MONGO_URI=mongodb://mongodb:27017/yourdbname
 
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]

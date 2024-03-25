@@ -4,3 +4,4 @@ yahooquery
 uvicorn
 pymongo
 python-dotenv
+pydantic

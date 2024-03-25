@@ -1,13 +1,16 @@
 from fastapi import APIRouter, HTTPException
-from ..models import Agent
+from ..models import Agent, PyObjectId
 from ..database.mongo import get_collections
+from bson import ObjectId
+from pymongo.collection import ReturnDocument
 
 router = APIRouter()
 
 @router.post("/", response_model=Agent)
 async def create_agent(agent: Agent):
     collections = await get_collections()
-    result = await collections["agents"].insert_one(agent.dict())
+    # MongoDB will automatically generate the '_id'
+    result = await collections["agents"].insert_one(agent.dict(by_alias=True))
     created_agent = await collections["agents"].find_one({"_id": result.inserted_id})
     return created_agent
 
@@ -18,29 +21,42 @@ async def get_agents():
     return agents
 
 @router.get("/{agent_id}", response_model=Agent)
-async def get_agent(agent_id: str):
+async def get_agent(agent_id: int):  # Assuming agent_id is passed as an int in the path
     collections = await get_collections()
-    agent = await collections["agents"].find_one({"_id": PyObjectId(agent_id)})
+    # Adjust query to use 'agent_id' instead of '_id'
+    agent = await collections["agents"].find_one({"agent_id": agent_id})
     if agent:
         return agent
     raise HTTPException(status_code=404, detail="Agent not found")
 
 @router.put("/{agent_id}", response_model=Agent)
-async def update_agent(agent_id: str, agent: Agent):
+async def update_agent(agent_id: int, update_data: Agent):  # Assuming agent_id is passed as an int in the path
     collections = await get_collections()
-    result = await collections["agents"].update_one(
-        {"_id": PyObjectId(agent_id)},
-        {"$set": agent.dict(exclude_unset=True)}
-    )
-    if result.modified_count:
-        updated_agent = await collections["agents"].find_one({"_id": PyObjectId(agent_id)})
-        return updated_agent
-    raise HTTPException(status_code=404, detail="Agent not found")
+    update_data_dict = {
+        k: v for k, v in update_data.model_dump(by_alias=True).items() if v is not None
+    }
+
+    if len(update_data_dict) >= 1:
+        update_result = await collections["agents"].find_one_and_update(
+            {"_id": ObjectId(agent_id)},  # Assuming agent_id is the ObjectId string.
+            {"$set": update_data_dict},
+            return_document=ReturnDocument.AFTER,
+        )
+        if update_result:
+            return update_result
+        else:
+            raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
+
+    # The update is empty, but we should still return the matching document if it exists.
+    if (existing_agent := await collections["agents"].find_one({"_id": ObjectId(agent_id)})) is not None:
+        return existing_agent
+
+    raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
 @router.delete("/{agent_id}", response_model=bool)
-async def delete_agent(agent_id: str):
+async def delete_agent(agent_id: int):  # Assuming agent_id is passed as an int in the path
     collections = await get_collections()
-    result = await collections["agents"].delete_one({"_id": PyObjectId(agent_id)})
+    result = await collections["agents"].delete_one({"agent_id": agent_id})
     if result.deleted_count:
         return True
     raise HTTPException(status_code=404, detail="Agent not found")

@@ -1,15 +1,23 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import Depends
+import pymongo
+from pymongo import mongo_client
 
-async def get_mongo_client():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
-    return client
+class MongoDB:
+    client = None
 
-async def get_database(client):
+    @classmethod
+    def get_client(cls):
+        if cls.client is None:
+            cls.client = AsyncIOMotorClient("mongodb://localhost:27017")
+        return cls.client
+
+async def get_database():
+    client = MongoDB.get_client()
     return client.stocksphere
 
 async def get_collections():
-    client = await get_mongo_client()
-    db = client.stocksphere
+    db = await get_database()
     collections = {
         "agents": db.agents,
         "customers": db.customers,
@@ -18,3 +26,9 @@ async def get_collections():
         "transactions": db.transactions,
     }
     return collections
+
+async def get_user():
+    db = await get_database()
+    User = db.users
+    User.create_index([("email", pymongo.ASCENDING)], unique=True)
+    return User
