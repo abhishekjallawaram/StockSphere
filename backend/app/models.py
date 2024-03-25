@@ -19,8 +19,7 @@ class PyObjectId(ObjectId):
 
 class Agent(BaseModel):
     agent_id: conint(ge=0, le=999999)
-    # name: _get_object_size
-    name : str  
+    name: str
     contact: str
     level: str
 
@@ -45,44 +44,12 @@ class Agent(BaseModel):
 #         arbitrary_types_allowed = True
 #         json_encoders = {ObjectId: str}
 
-class Stock(BaseModel):
-    stock_id: conint(ge=0, le=999999)
-    Company_name: str
-    Company_ticker: str
-    Closed_price: float
-    Company_info: str
-    Company_PE: Optional[float] = Field(None, description="Price to Earnings Ratio")
-    Company_cash_flow: Optional[float] = Field(None, description="Operating Cash Flow")
-    Company_dividend: Optional[float] = Field(None, description="Dividend Rate")
-
-
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: lambda o: str(o)}
-        populate_by_name  = True
-        # orm_mode = True
-        
-        
-        
-        
-class CreateStockRequest(BaseModel):
-    Company_name: str
-    Company_ticker: str
-    Closed_price: float
-    Company_info: str
-    Company_PE: Optional[float] = Field(None, description="Price to Earnings Ratio")
-    Company_cash_flow: Optional[float] = Field(None, description="Operating Cash Flow")
-    Company_dividend: Optional[float] = Field(None, description="Dividend Rate")
-    
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: lambda o: str(o)}
-        populate_by_name  = True
-
-        
-        
-
-
+# class Stock(BaseModel):
+#     id: Optional[PyObjectId] = None
+#     name: str
+#     ticker: str
+#     price_currency: str
+#     cash_flow: float
 
 #     class Config:
 #         orm_mode = True
