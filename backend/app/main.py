@@ -21,10 +21,7 @@ async def update_recent_data():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(update_recent_data())
-    
-    
-    
-    
+        
 app.include_router(agents.router, prefix="/agents", tags=["agents"])
 # app.include_router(customers.router, prefix="/customers", tags=["customers"])
 app.include_router(stocks.router, prefix="/stocks", tags=["stocks"])

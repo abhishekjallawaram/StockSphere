@@ -61,7 +61,7 @@ async def create_item(ytic: str):
         comp = yf.Ticker(ytic)
         if "longName" not in comp.info:
             raise HTTPException(status_code=404, detail="Yahoo Finance ticker not found")
-    except Exception as e:  
+    except Exception as e: 
         raise HTTPException(status_code=400, detail=str(e))
     body = {
         'Company_name': comp.info['longName'],

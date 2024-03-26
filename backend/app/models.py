@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field , conint
 from typing import Optional
 from bson import ObjectId
+from beanie import Document, Indexed
+from pydantic import Field, EmailStr
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -16,6 +18,8 @@ class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
+        
+        
 
 class Agent(BaseModel):
     agent_id: conint(ge=0, le=999999)
@@ -28,6 +32,40 @@ class Agent(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+class Customer(BaseModel):
+    customer_id: conint(ge=0, le=999999)
+    username: Indexed(str, unique=True)
+    email: Indexed(EmailStr, unique=True)
+    hashed_password: str
+    balance: Optional[float] = Field(None, description="Account Balance")
+    net_stock: Optional[float] = Field(None, description="Stock worth")
+    
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+        
+class CustomerRequenst(BaseModel):
+    
+    username: Indexed(str, unique=True)
+    email: Indexed(EmailStr, unique=True)
+    hashed_password: str
+    balance: Optional[float] = Field(None, description="Account Balance")
+    net_stock: Optional[float] = Field(None, description="Stock worth")
+    
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+
 
     # class Config:
     #     allow_population_by_field_name = True
@@ -121,3 +159,4 @@ class CreateStockRequest(BaseModel):
 #         allow_population_by_field_name = True
 #         arbitrary_types_allowed = True
 #         json_encoders = {ObjectId: str}
+
