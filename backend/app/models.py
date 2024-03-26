@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field , conint
 from typing import Optional
 from bson import ObjectId
+from beanie import Document, Indexed
+from pydantic import Field, EmailStr
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -16,10 +18,13 @@ class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
+        
+        
 
 class Agent(BaseModel):
     agent_id: conint(ge=0, le=999999)
-    name: str
+    # name: _get_object_size
+    name : str  
     contact: str
     level: str
 
@@ -27,6 +32,40 @@ class Agent(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+class Customer(BaseModel):
+    customer_id: conint(ge=0, le=999999)
+    username: Indexed(str, unique=True)
+    email: Indexed(EmailStr, unique=True)
+    hashed_password: str
+    balance: Optional[float] = Field(None, description="Account Balance")
+    net_stock: Optional[float] = Field(None, description="Stock worth")
+    
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+        
+class CustomerRequenst(BaseModel):
+    
+    username: Indexed(str, unique=True)
+    email: Indexed(EmailStr, unique=True)
+    hashed_password: str
+    balance: Optional[float] = Field(None, description="Account Balance")
+    net_stock: Optional[float] = Field(None, description="Stock worth")
+    
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        
+        
+
 
     # class Config:
     #     allow_population_by_field_name = True
@@ -44,12 +83,44 @@ class Agent(BaseModel):
 #         arbitrary_types_allowed = True
 #         json_encoders = {ObjectId: str}
 
-# class Stock(BaseModel):
-#     id: Optional[PyObjectId] = None
-#     name: str
-#     ticker: str
-#     price_currency: str
-#     cash_flow: float
+class Stock(BaseModel):
+    stock_id: conint(ge=0, le=999999)
+    Company_name: str
+    Company_ticker: str
+    Closed_price: float
+    Company_info: str
+    Company_PE: Optional[float] = Field(None, description="Price to Earnings Ratio")
+    Company_cash_flow: Optional[float] = Field(None, description="Operating Cash Flow")
+    Company_dividend: Optional[float] = Field(None, description="Dividend Rate")
+
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        populate_by_name  = True
+        # orm_mode = True
+        
+        
+        
+        
+class CreateStockRequest(BaseModel):
+    Company_name: str
+    Company_ticker: str
+    Closed_price: float
+    Company_info: str
+    Company_PE: Optional[float] = Field(None, description="Price to Earnings Ratio")
+    Company_cash_flow: Optional[float] = Field(None, description="Operating Cash Flow")
+    Company_dividend: Optional[float] = Field(None, description="Dividend Rate")
+    
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        populate_by_name  = True
+
+        
+        
+
+
 
 #     class Config:
 #         orm_mode = True
@@ -88,3 +159,4 @@ class Agent(BaseModel):
 #         allow_population_by_field_name = True
 #         arbitrary_types_allowed = True
 #         json_encoders = {ObjectId: str}
+
