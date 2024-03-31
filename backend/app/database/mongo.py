@@ -36,3 +36,34 @@ async def get_user():
     User = db.users
     User.create_index([("email", pymongo.ASCENDING)], unique=True)
     return User
+
+
+
+
+from fastapi import FastAPI, WebSocket
+from pymongo import MongoClient
+from starlette.websockets import WebSocketDisconnect
+
+app = FastAPI()
+
+# # Initialize MongoDB client and specify your database and collection
+client = MongoClient("mongodb://localhost:27017")
+db = client["stocksphere"]
+# collection = db["your_collection"]
+
+connected_clients = []
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients.append(websocket)
+    try:
+        # MongoDB Change Stream
+        with db.watch() as stream:
+            for change in stream:
+                # Broadcast the change to all connected WebSocket clients
+                for client in connected_clients:
+                    await client.send_json(change)
+    except WebSocketDisconnect:
+        connected_clients.remove(websocket)
+        print("Client disconnected")
