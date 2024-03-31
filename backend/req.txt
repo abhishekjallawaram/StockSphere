@@ -44,3 +44,5 @@ beanie
 python-decouple
 passlib
 python-jose
+bcrypt
+python-multipart

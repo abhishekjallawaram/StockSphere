@@ -4,6 +4,7 @@ from app.database.mongo import MongoDB
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils import yahoo_finance
 from app.routes import auth
+from app.routes import auth
 from datetime import datetime
 import asyncio
 
@@ -21,23 +22,25 @@ async def update_recent_data():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(update_recent_data())
-        
-app.include_router(agents.router, prefix="/agents", tags=["agents"])
-# app.include_router(customers.router, prefix="/customers", tags=["customers"])
-app.include_router(stocks.router, prefix="/stocks", tags=["stocks"])
-# app.include_router(stock_history.router, prefix="/stock-history", tags=["stock-history"])
-# app.include_router(transactions.router, prefix="/transactions", tags=["transactions"])
+
+
+app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
+app.include_router(customers.router, prefix="/api/customers", tags=["customers"])
+app.include_router(stocks.router, prefix="/api/stocks", tags=["stocks"])
+app.include_router(stock_history.router, prefix="/api/stock-history", tags=["stock-history"])
+app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
 
 
 app.add_middleware(
     CORSMiddleware,
+     allow_origins=['http://localhost:3000','http://localhost:5173'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
+app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
 
 
 @app.get("/api/healthchecker")
@@ -63,3 +66,8 @@ def root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+    
+    
+    
+    
+#-------------------------------------------------------------------------------Auth

@@ -6,6 +6,7 @@ fronend/.pnp
 fronend/.pnp.js
 backend/venv
 /backend/infs_env
+backend/env
 
 # testing
 /coverage

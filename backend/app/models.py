@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field , conint
+from pydantic import BaseModel, Field , conint,constr,validator
 from typing import Optional
 from bson import ObjectId
 from beanie import Document, Indexed
 from pydantic import Field, EmailStr
+from datetime import datetime
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -36,52 +37,18 @@ class Agent(BaseModel):
         
 class Customer(BaseModel):
     customer_id: conint(ge=0, le=999999)
-    username: Indexed(str, unique=True)
-    email: Indexed(EmailStr, unique=True)
+    username: str
+    email: EmailStr
     hashed_password: str
     balance: Optional[float] = Field(None, description="Account Balance")
-    net_stock: Optional[float] = Field(None, description="Stock worth")
-    
-    
+    net_stock:  float = Field(default=0.0, description="Stock worth")
+    role: str = Field(default="customer", description="The role of the user") 
     class Config:
-        populate_by_name = True
+        allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: lambda o: str(o)}
-        
-        
-        
-class CustomerRequenst(BaseModel):
-    
-    username: Indexed(str, unique=True)
-    email: Indexed(EmailStr, unique=True)
-    hashed_password: str
-    balance: Optional[float] = Field(None, description="Account Balance")
-    net_stock: Optional[float] = Field(None, description="Stock worth")
-    
-    
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: lambda o: str(o)}
-        
         
 
 
-    # class Config:
-    #     allow_population_by_field_name = True
-    #     arbitrary_types_allowed = True
-        
-# class Customer(BaseModel):
-#     id: Optional[PyObjectId] = None
-#     name: str
-#     email: EmailStr
-#     balance: float
-
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_field_name = True
-#         arbitrary_types_allowed = True
-#         json_encoders = {ObjectId: str}
 
 class Stock(BaseModel):
     stock_id: conint(ge=0, le=999999)
@@ -101,62 +68,49 @@ class Stock(BaseModel):
         # orm_mode = True
         
         
-        
-        
-class CreateStockRequest(BaseModel):
-    Company_name: str
+class StockData(BaseModel):
+    Open: float
+    High: float
+    Low: float
+    Close: float
+    Adj_Close: float = Field(..., alias='Adj Close')  # Alias for 'Adj Close'
+    Volume: int
     Company_ticker: str
-    Closed_price: float
-    Company_info: str
-    Company_PE: Optional[float] = Field(None, description="Price to Earnings Ratio")
-    Company_cash_flow: Optional[float] = Field(None, description="Operating Cash Flow")
-    Company_dividend: Optional[float] = Field(None, description="Dividend Rate")
+    Date:  str = Field(..., alias='date')  # Alias for 'date'
+
+
+
+class Transaction(BaseModel):
+    transaction_id: conint(ge=0, le=999999)
+    customer_id: conint(ge=0, le=999999)
+    stock_id: conint(ge=0, le=999999)
+    agent_id: conint(ge=0, le=999999)
+    ticket: str
+    volume: int
+    each_cost:float
+    action: str  # constrains the string to either 'buy' or 'sell'
+    date: datetime = Field(default_factory=datetime.now)
     
+    @validator('action')
+    def check_action(cls, v):
+        if v not in ['buy', 'sell']:
+            raise ValueError('Action must be "buy" or "sell"')
+        return v
+
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: lambda o: str(o)}
-        populate_by_name  = True
+        schema_extra = {
+            "example": {
+                "customer_id": "1",
+                "stock_id": "1",
+                "agent_id": "1",
+                "ticket": "GOOGL",
+                "volume": 100,
+                "action": "buy",
+                "date": "2024-03-26T12:00:00Z"
+            }
+        }
 
-        
-        
 
-
-
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_field_name = True
-#         arbitrary_types_allowed = True
-#         json_encoders = {ObjectId: str}
-
-# class StockHistory(BaseModel):
-#     id: Optional[PyObjectId] = None
-#     name: str
-#     ticker: str
-#     date: str
-#     open: float
-#     close: float
-#     low: float
-#     high: float
-
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_field_name = True
-#         arbitrary_types_allowed = True
-#         json_encoders = {ObjectId: str}
-
-# class Transaction(BaseModel):
-#     id: Optional[PyObjectId] = None
-#     customer_id: PyObjectId
-#     stock_id: PyObjectId
-#     ticker: str
-#     volume: int
-#     action: str
-#     date: str
-#     agent_id: PyObjectId
-
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_field_name = True
-#         arbitrary_types_allowed = True
-#         json_encoders = {ObjectId: str}
 
