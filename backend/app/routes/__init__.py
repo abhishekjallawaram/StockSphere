@@ -1,2 +1,1 @@
-from app.routes import agents
-# , customers, stocks, stock_history, transactions
+from app.routes import agents, customers, stocks, stock_history, transactions
