@@ -88,6 +88,7 @@ class Transaction(BaseModel):
     ticket: str
     volume: int
     each_cost:float
+
     action: str  # constrains the string to either 'buy' or 'sell'
     date: datetime = Field(default_factory=datetime.now)
     
