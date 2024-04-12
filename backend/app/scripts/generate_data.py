@@ -146,8 +146,8 @@ async def generate_and_insert_transactions(collections, num_transactions):
             "stock_id": stock['stock_id'],
             "agent_id": agent["agent_id"],
             "ticket": stock['Company_ticker'], 
-            "volume": random.randint(1, 100),
-            "each_cost": round(random.uniform(10, 1000), 2),
+            "volume": random.randint(20, 100),
+            "each_cost": stock['Closed_price'],
             "action": random.choice(['buy', 'sell']),
             "date": faker.date_time_between(start_date="-2y", end_date="now").isoformat()
         }
