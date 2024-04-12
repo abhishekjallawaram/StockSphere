@@ -75,6 +75,8 @@ async def fetch_and_update_stock_data():
             print(f"Error updating stock {symbol}: {e}")
 
 
+
+
 async def fetch_and_store_historical_data():
     
     if await stock_history_collection.count_documents({}) > 0:

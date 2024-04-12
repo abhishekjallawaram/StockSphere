@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Register from "./pages/Register";
 import PrivateRoute from "./utils/PrivateRoute";
 import Dashboad from './pages/Dashboad';
+import StockAnalysis from "./pages/StockAnalysis";
+import { ThemeProvider } from "./components/ui/theme-provider";
 
 
 
@@ -12,6 +14,7 @@ function App() {
   // The token state is no longer necessary here since the validation is handled within PrivateRoute
 
   return (
+    <ThemeProvider>
     <div className=""> {/* Use the container class */}
       <Router className="">
         <Routes>
@@ -22,9 +25,15 @@ function App() {
               <Dashboad/>
             </PrivateRoute>
           } />
+          <Route path="/stockanalysis" element={
+            <PrivateRoute>
+              <StockAnalysis/>
+            </PrivateRoute>
+          } />
         </Routes>
       </Router>
      </div>
+     </ThemeProvider>
   );
 }
 
