@@ -26,3 +26,10 @@ yarn-debug.log*
 yarn-error.log*
 backend/app/__pycache__
 backend/routes/__pycache__
+/backend/app/database/__pycache__
+/backend/app/routes/__pycache__
+/backend/app/scripts/__pycache__
+/backend/app/scripts/__pycache__
+/backend/app/utils/__pycache__
+/backend/app/scripts/__pycache__
+backend/app/scripts/__pycache__/generate_data.cpython-312.pyc
