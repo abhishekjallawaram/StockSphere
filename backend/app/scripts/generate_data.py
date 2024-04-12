@@ -37,7 +37,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import random
 import logging
 # Adjust the import path as necessary
-from app.models import Agent, Customer
+from app.models import Agent, Customer, Stock
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -63,6 +63,7 @@ async def get_collections():
         "agents": db.agents,
         "customers": db.customers,
         "transactions": db.transactions,
+        "stocks": db.stocks
     }
 
 async def generate_unique_id(collection, field_name):
@@ -73,10 +74,12 @@ async def generate_unique_id(collection, field_name):
 
 async def insert_agents(collections, num_agents):
     for _ in range(num_agents):
+        # Using a custom format for US phone numbers (e.g., 555-012-3456)
+        phone_number = faker.numerify(text='###-###-####')  # Generates a phone number in the specified mask
         agent_data = {
             "agent_id": await generate_unique_id(collections["agents"], "agent_id"),
             "name": faker.name(),
-            "contact": faker.phone_number(),
+            "contact": phone_number,
             "level": random.choice(['Junior', 'Senior', 'Manager'])
         }
         agent = Agent(**agent_data)
@@ -86,12 +89,32 @@ async def insert_agents(collections, num_agents):
         except Exception as e:
             logging.error(f"Failed to insert agent: {e}")
 
+
 async def insert_customers(collections, num_customers):
+    username_counts = {}  
     for _ in range(num_customers):
+        while True:
+            name = faker.name()  
+            first_name, last_name = name.split(" ")[0], name.split(" ")[-1]
+            base_username = f"{first_name[0].lower()}{last_name.lower()}"
+
+            # Check for duplicates and append number if necessary
+            if base_username in username_counts:
+                username_counts[base_username] += 1
+                username = f"{base_username}{username_counts[base_username]}"
+            else:
+                username_counts[base_username] = 0
+                username = base_username
+
+            # Ensure the username is suitable for email
+            if '.' not in username[-1]:  
+                break
+
+        email = f"{username}@infs.com"  
         customer_data = {
             "customer_id": await generate_unique_id(collections["customers"], "customer_id"),
-            "username": faker.user_name(),
-            "email": faker.email(),
+            "username": username,
+            "email": email,
             "hashed_password": faker.md5(),
             "balance": round(random.uniform(1000, 10000), 2),
             "net_stock": round(random.uniform(0, 5000), 2),
@@ -100,24 +123,29 @@ async def insert_customers(collections, num_customers):
         customer = Customer(**customer_data)
         try:
             await collections["customers"].insert_one(customer.dict(by_alias=True))
-            logging.info(f"Successfully inserted customer with ID: {customer.customer_id}")
+            logging.info(f"Successfully inserted customer with ID: {customer.customer_id}, Username: {username}")
         except Exception as e:
             logging.error(f"Failed to insert customer: {e}")
+
+
 
 async def generate_and_insert_transactions(collections, num_transactions):
     agents = await collections["agents"].find().to_list(length=100)
     customers = await collections["customers"].find().to_list(length=100)
+    stocks = await collections["stocks"].find().to_list(length=100)  
 
     for _ in range(num_transactions):
         transaction_id = await generate_unique_id(collections["transactions"], "transaction_id")
         customer = random.choice(customers)
         agent = random.choice(agents)
+        stock = random.choice(stocks)  
+
         transaction = {
             "transaction_id": transaction_id,
             "customer_id": customer["customer_id"],
-            "stock_id": random.randint(1, 999999),
+            "stock_id": stock['stock_id'],
             "agent_id": agent["agent_id"],
-            "ticket": faker.bothify(text='???-####', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+            "ticket": stock['Company_ticker'], 
             "volume": random.randint(1, 100),
             "each_cost": round(random.uniform(10, 1000), 2),
             "action": random.choice(['buy', 'sell']),
@@ -125,9 +153,11 @@ async def generate_and_insert_transactions(collections, num_transactions):
         }
         try:
             await collections["transactions"].insert_one(transaction)
-            logging.info(f"Successfully inserted transaction with ID: {transaction_id}")
+            logging.info(f"Successfully inserted transaction with ID: {transaction_id}, Stock Ticker: {stock['Company_ticker']}")
         except Exception as e:
             logging.error(f"Failed to insert transaction with ID {transaction_id}: {e}")
+
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate synthetic data for MongoDB.")
