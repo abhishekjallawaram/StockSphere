@@ -5,12 +5,14 @@ import Login from './pages/Login';
 import Register from "./pages/Register";
 import PrivateRoute from "./utils/PrivateRoute";
 import Dashboad from './pages/Dashboad';
+import AdminDashboad from './pages/AdminDashboad';
 import StockAnalysis from "./pages/StockAnalysis";
 import { ThemeProvider } from "./components/ui/theme-provider";
 
 
 
 function App() {
+  
   // The token state is no longer necessary here since the validation is handled within PrivateRoute
 
   return (
@@ -24,6 +26,11 @@ function App() {
             <PrivateRoute>
               <Dashboad/>
             </PrivateRoute>
+          } />
+          <Route path="/admin/dashboard" element={
+            <PrivateRoute roleRequired="admin">
+            <AdminDashboad/>
+  </PrivateRoute>
           } />
           <Route path="/stockanalysis" element={
             <PrivateRoute>
