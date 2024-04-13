@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from datetime import datetime
 from app.models import Transaction,Customer,Stock
-from app.routes.schemas import TransactionRequest,Cstock
+from app.routes.schemas import TransactionRequest,Cstock,Transactionpro
 from fastapi import APIRouter, HTTPException
 from app.database.mongo import get_collections
 from app.utils import authutils
@@ -25,6 +25,28 @@ async def get_stocks( user: Customer = Depends(authutils.get_current_admin)):
 
 
 
+# @router.get("/customer-stocks", response_model=List[Cstock])
+# async def get_customer_stocks(user: Customer = Depends(authutils.get_current_user)):
+#     collections = await get_collections()
+#     transactions = await collections["transactions"].find({"customer_id": user.customer_id}).to_list(length=None)
+
+#     if not transactions:
+#         raise HTTPException(status_code=404, detail="No transactions found for the user")
+
+#     customer_stocks = [
+#         Cstock(
+#             stock_ticket=transaction["ticket"],
+#             each_cost=transaction["each_cost"],
+#             volume=transaction["volume"]
+#         )
+#         for transaction in transactions
+#     ]
+#     return customer_stocks
+
+from collections import defaultdict
+
+
+
 @router.get("/customer-stocks", response_model=List[Cstock])
 async def get_customer_stocks(user: Customer = Depends(authutils.get_current_user)):
     collections = await get_collections()
@@ -33,26 +55,55 @@ async def get_customer_stocks(user: Customer = Depends(authutils.get_current_use
     if not transactions:
         raise HTTPException(status_code=404, detail="No transactions found for the user")
 
+    stock_aggregate = defaultdict(lambda: {'each_cost': 0, 'volume': 0})
+    
+    for transaction in transactions:
+        ticket = transaction['ticket']
+        stock_aggregate[ticket]['volume'] += transaction['volume']
+        stock_aggregate[ticket]['each_cost'] = transaction['each_cost']
+
     customer_stocks = [
         Cstock(
-            stock_ticket=transaction["ticket"],
-            each_cost=transaction["each_cost"],
-            volume=transaction["volume"]
+            stock_ticket=ticket,
+            each_cost=info['each_cost'],
+            volume=info['volume']
         )
-        for transaction in transactions
+        for ticket, info in stock_aggregate.items()
     ]
     return customer_stocks
 
-@router.get("/", response_model=list[Transaction])
+
+
+
+@router.get("/admin/", response_model=list[Transaction])
 async def get_stocks(user: Customer = Depends(authutils.get_current_admin)):
-    userid=user.customer_id
+    # userid=user.customer_id
     collections = await get_collections()
-    transaction_data = await collections["transactions"].find({"customer_id": userid}).to_list(length=100)
+    transaction_data = await collections["transactions"].find().to_list(length=100)
     
     return transaction_data
 
 
-@router.get("/{transcationid}", response_model=Transaction)
+@router.get("/adminpro/", response_model=list[Transactionpro])
+async def get_transactions(user: Customer = Depends(authutils.get_current_admin)):
+    collections = await get_collections()
+    transaction_data = await collections["transactions"].find().to_list(length=100)
+    
+    # Prepare to enrich transactions with customer and agent names
+    for transaction in transaction_data:
+        # Fetch the customer name
+        customer = await collections["customers"].find_one({"customer_id": transaction["customer_id"]})
+        transaction["customer_name"] = customer["username"] if customer else "Unknown"
+
+        # Fetch the agent name
+        agent = await collections["agents"].find_one({"agent_id": transaction["agent_id"]})
+        transaction["agent_name"] = agent["name"] if agent else "Unknown"
+
+    return [Transactionpro(**t) for t in transaction_data]
+
+
+
+@router.get("/admin/{transcationid}", response_model=Transaction)
 async def read_transaction_byid(transcationid: int, user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
     item = await collections["transactions"].find_one({"transaction_id": transcationid})
@@ -82,7 +133,7 @@ async def create_stock(trancation: TransactionRequest, user: Customer = Depends(
     return created_transaction
 
 
-@router.get("/[transactions]", response_model=List[Transaction]) 
+@router.get("/admin/[transactions]", response_model=List[Transaction]) 
 async def get_transactions(user: Customer = Depends(authutils.get_current_admin),
     customer_id: Optional[int] = Query(None), 
     stock_id: Optional[int] = Query(None),
@@ -108,12 +159,7 @@ async def get_transactions(user: Customer = Depends(authutils.get_current_admin)
     return transactions
 
 
-
-
-
-
-
-@router.put("/{transcationid}", response_model=Transaction)
+@router.put("/admin/{transcationid}", response_model=Transaction)
 async def update_transaction(transcationid: int, update_data: TransactionRequest,user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
     updated_TRANSACTION = await collections["transactions"].find_one_and_update(
@@ -128,11 +174,7 @@ async def update_transaction(transcationid: int, update_data: TransactionRequest
     
 
 
-
-
-
-
-@router.delete("/{transcationid}", response_model=dict)
+@router.delete("/admin/{transcationid}", response_model=dict)
 async def delete_stock(transcationid: int,user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
     delete_result = await collections["transactions"].delete_one({"transaction_id": transcationid})

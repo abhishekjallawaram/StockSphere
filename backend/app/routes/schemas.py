@@ -138,3 +138,23 @@ class TokenPayload(BaseModel):
 class UserAuth(BaseModel):
     email: EmailStr = Field(..., description="user email")
     password: str = Field(..., min_length=5, max_length=24, description="user password")
+    
+class Transactionpro(BaseModel):
+    transaction_id: conint(ge=0, le=999999)
+    customer_id: conint(ge=0, le=999999)
+    stock_id: conint(ge=0, le=999999)
+    agent_id: conint(ge=0, le=999999)
+    ticket: str
+    volume: int
+    each_cost: float
+    action: str  # Constrained to 'buy' or 'sell'
+    date: datetime = Field(default_factory=datetime.now)
+    customer_name: Optional[str] = None
+    agent_name: Optional[str] = None
+
+    @validator('action')
+    def check_action(cls, v):
+        if v not in ['buy', 'sell']:
+            raise ValueError('Action must be "buy" or "sell"')
+        return v
+

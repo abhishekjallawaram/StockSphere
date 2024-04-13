@@ -34,10 +34,6 @@ async def create_stockdata(stockdata: StockData,user: Customer = Depends(authuti
     return StockData(**created_stock)
 
 
-
-
-
-
 # @router.get("/{ytic}", response_model=List[StockData])
 # async def create_batch_items(tickers: str):
 #     collections = await get_collections()
