@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.routes import agents, customers, stocks, stock_history, transactions
+from app.routes import agents, customers, stocks, stock_history, transactions, crypto_history, cryptocurrencies
 from app.database.mongo import MongoDB
 from fastapi.middleware.cors import CORSMiddleware
-from app.utils import yahoo_finance
+from app.utils import yahoo_finance, yahoo_finance_crypto
 from app.routes import auth
 from app.routes import auth
 from datetime import datetime
@@ -16,6 +16,8 @@ async def update_recent_data():
         current_date = datetime.now()
         await yahoo_finance.fetch_and_update_stock_data()
         await yahoo_finance.fetch_and_store_historical_data()
+        await yahoo_finance_crypto.fetch_and_update_crypto_data()
+        await yahoo_finance_crypto.fetch_and_store_historical_data()
         await asyncio.sleep(300)  
 
 
@@ -29,6 +31,8 @@ app.include_router(customers.router, prefix="/api/customers", tags=["customers"]
 app.include_router(stocks.router, prefix="/api/stocks", tags=["stocks"])
 app.include_router(stock_history.router, prefix="/api/stock-history", tags=["stock-history"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
+app.include_router(cryptocurrencies.router, prefix="/api/cryptocurrencies", tags=["cryptocurrencies"])
+app.include_router(crypto_history.router, prefix="/api/crypto_history", tags=["crypto_history"])
 
 
 app.add_middleware(
