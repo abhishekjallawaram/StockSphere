@@ -113,5 +113,29 @@ class Transaction(BaseModel):
             }
         }
 
+class Crypto(BaseModel):
+    crypto_id: conint(ge=0, le=999999)
+    Name: str
+    Symbol: str
+    Last_Close: float
+    Market_Cap: Optional[float] = Field(None, description="Market Capitalization")
+    Volume_24h: Optional[float] = Field(None, description="24 Hour Trading Volume")
+    Circulating_Supply: Optional[float] = Field(None, description="Circulating Supply")
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        populate_by_name = True
+        # orm_mode = True if you're interfacing directly with ORMs
+
+class CryptoData(BaseModel):
+    Open: float
+    High: float
+    Low: float
+    Close: float
+    Adj_Close: float = Field(..., alias='Adj Close')  # Alias for 'Adj Close'
+    Volume: int
+    Symbol: str
+    Date: str = Field(..., alias='date')  # Alias for 'date'
 
 

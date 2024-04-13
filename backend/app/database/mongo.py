@@ -24,6 +24,8 @@ async def get_collections():
         "stocks": db.stocks,
         "stock_history": db.stock_history,
         "transactions": db.transactions,
+        "cryptocurrencies" : db.cryptocurrencies,
+        "crypto_history" : db.crypto_history
     }
     await collections["stocks"].create_index([("stock_id", pymongo.ASCENDING)], unique=True)
     await collections["stocks"].create_index([("Company_ticker", pymongo.ASCENDING)], unique=True)
@@ -49,7 +51,6 @@ app = FastAPI()
 # # Initialize MongoDB client and specify your database and collection
 client = MongoClient("mongodb://localhost:27017")
 db = client["stocksphere"]
-# collection = db["your_collection"]
 
 connected_clients = []
 

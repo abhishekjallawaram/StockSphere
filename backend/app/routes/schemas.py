@@ -74,6 +74,19 @@ class CustomerRequenst(BaseModel):
         json_encoders = {ObjectId: lambda o: str(o)}
         populate_by_name  = True
         
+class CreateCryptoRequest(BaseModel):
+    Name: str
+    Symbol: str
+    Last_Close: float
+    Market_Cap: Optional[float] = Field(None, description="Market Capitalization")
+    Volume_24h: Optional[float] = Field(None, description="24 Hour Trading Volume")
+    Circulating_Supply: Optional[float] = Field(None, description="Circulating Supply")
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        populate_by_name = True
+        
 class CustomerResponse(BaseModel):
     customer_id: int
     username: str
