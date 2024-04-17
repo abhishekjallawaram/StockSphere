@@ -59,8 +59,8 @@ pipeline = [
 ]
 
 # Execute the query
-top_customers = list(db.transactions.aggregate(pipeline))
+customers_most_transactions = list(db.transactions.aggregate(pipeline))
 
 # Printing the results
-for customer in top_customers:
+for customer in customers_most_transactions:
     print(customer)

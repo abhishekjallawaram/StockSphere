@@ -171,3 +171,25 @@ class Transactionpro(BaseModel):
             raise ValueError('Action must be "buy" or "sell"')
         return v
 
+
+class CustomerInfo(BaseModel):
+    customer_id: int
+    username: str
+    email: str
+    total_cost: float
+    agent_name: str
+    agent_level: str
+    
+class AgentInfo(BaseModel):
+    agent_id: int
+    agent_name: str
+    agent_level: str
+    total_cost: float
+    
+class CustomerTransactionInfo(BaseModel):
+    customer_id: int
+    username: str
+    email: str
+    total_transactions: int
+    agent_name: str
+    agent_level: str
