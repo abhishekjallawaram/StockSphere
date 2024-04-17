@@ -84,6 +84,7 @@ class Transaction(BaseModel):
     transaction_id: conint(ge=0, le=999999)
     customer_id: conint(ge=0, le=999999)
     stock_id: conint(ge=0, le=999999)
+    crypto_id: conint(ge=0, le=999999)
     agent_id: conint(ge=0, le=999999)
     ticket: str
     volume: int
