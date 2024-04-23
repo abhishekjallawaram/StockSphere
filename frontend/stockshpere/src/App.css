@@ -61,3 +61,22 @@ body, html {
   width: 100%;
   height: auto; /* Adjust height as needed */
 }
+.react-datepicker-wrapper {
+  width: 50%;
+}
+
+.react-datepicker__input-container input {
+  height: 38px; /* Match height with Select */
+  width: 50%; /* Full width */
+  border: 1px solid #ced4da; /* Border color */
+  border-radius: 4px; /* Border radius */
+  color: #495057; /* Text color */
+  background-color: #ffffff; /* Background color */
+}
+
+/* Dark mode adjustments if necessary */
+.dark .react-datepicker__input-container input {
+  color: #fff;
+  background-color: #343a40;
+  border-color: #495057;
+}
