@@ -309,11 +309,11 @@ async def get_customers_with_most_crypto_transactions(user: Customer = Depends(a
     customer_ids = {t["customer_id"] for t in transactions if "customer_id" in t}
     agent_ids = {t["agent_id"] for t in transactions if "agent_id" in t}
 
-    # Fetch customer and agent details
+   
     customers = {c["customer_id"]: c for c in await collections["customers"].find({"customer_id": {"$in": list(customer_ids)}}).to_list(length=None)}
     agents = {a["agent_id"]: a for a in await collections["agents"].find({"agent_id": {"$in": list(agent_ids)}}).to_list(length=None)}
 
-    # Aggregate transactions by customer
+    
     grouped_data = defaultdict(lambda: {'total_transactions': 0, 'customer_info': None, 'agent_info': None})
     for transaction in transactions:
         customer_id = transaction.get("customer_id")
@@ -322,11 +322,11 @@ async def get_customers_with_most_crypto_transactions(user: Customer = Depends(a
             grouped_data[customer_id]['customer_info'] = customers.get(customer_id)
             grouped_data[customer_id]['agent_info'] = agents.get(transaction.get("agent_id"))
 
-    # Sort and limit results
+    
     limit = 10
     sorted_customers = sorted(grouped_data.items(), key=lambda x: x[1]['total_transactions'], reverse=True)[:limit]
     
-    # Prepare the results
+    
     results = [
         CustomerCryptoTransactionCount(
             customer_id=(key),
@@ -338,4 +338,48 @@ async def get_customers_with_most_crypto_transactions(user: Customer = Depends(a
         ) for key, val in sorted_customers
     ]
     
+    return results
+
+class CustomerTransactionCount(BaseModel):
+    customer_id: int
+    username: str | None
+    email: str | None
+    total_transactions: int
+    agent_name: str | None
+    agent_level: int | None
+
+@router.get("/transactions/{stock_id}/top-customers", response_model=List[CustomerTransactionCount])
+async def get_top_customers_for_stock(stock_id: int, user: Customer = Depends(authutils.get_current_admin)):
+    collections = await get_collections()
+    
+    transactions = await collections["transactions"].find({"stock_id": stock_id}).to_list(length=None)
+    
+    customer_ids = {t["customer_id"] for t in transactions if "customer_id" in t}
+    agent_ids = {t["agent_id"] for t in transactions if "agent_id" in t}
+
+    customers = {c["customer_id"]: c for c in await collections["customers"].find({"customer_id": {"$in": list(customer_ids)}}).to_list(length=None)}
+    agents = {a["agent_id"]: a for a in await collections["agents"].find({"agent_id": {"$in": list(agent_ids)}}).to_list(length=None)}
+
+    grouped_data = defaultdict(lambda: {'total_transactions': 0, 'customer_info': None, 'agent_info': None})
+    for transaction in transactions:
+        customer_id = transaction.get("customer_id")
+        if customer_id:
+            grouped_data[customer_id]['total_transactions'] += 1
+            grouped_data[customer_id]['customer_info'] = customers.get(customer_id)
+            grouped_data[customer_id]['agent_info'] = agents.get(transaction.get("agent_id"))
+
+    limit = 10
+    sorted_customers = sorted(grouped_data.items(), key=lambda x: x[1]['total_transactions'], reverse=True)[:limit]
+
+    results = [
+        CustomerTransactionCount(
+            customer_id=key,
+            username=val['customer_info']['username'] if val['customer_info'] else None,
+            email=val['customer_info']['email'] if val['customer_info'] else None,
+            total_transactions=val['total_transactions'],
+            agent_name=val['agent_info']['name'] if val['agent_info'] else None,
+            agent_level=val['agent_info']['level'] if val['agent_info'] else None
+        ) for key, val in sorted_customers
+    ]
+
     return results
