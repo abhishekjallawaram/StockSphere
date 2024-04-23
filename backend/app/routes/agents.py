@@ -22,17 +22,16 @@ async def get_agents(user: Customer = Depends(authutils.get_current_user)):
     return agents
 
 @router.get("/{agent_id}", response_model=Agent)
-async def get_agent(agent_id: int,user: Customer = Depends(authutils.get_current_user)):  # Assuming agent_id is passed as an int in the path
+async def get_agent(agent_id: int,user: Customer = Depends(authutils.get_current_user)):  
     collections = await get_collections()
-    # Adjust query to use 'agent_id' instead of '_id'
+    
     agent = await collections["agents"].find_one({"agent_id": agent_id})
     if agent:
         return agent
     raise HTTPException(status_code=404, detail="Agent not found")
 
 @router.put("/{agent_id}", response_model=Agent)
-async def update_agent(agent_id: int, update_data: Agent,user: Customer = Depends(authutils.get_current_admin)):  # Assuming agent_id is passed as an int in the path
-    collections = await get_collections()
+async def update_agent(agent_id: int, update_data: Agent,user: Customer = Depends(authutils.get_current_admin)):  
     update_data_dict = {
         k: v for k, v in update_data.model_dump(by_alias=True).items() if v is not None
     }
@@ -47,7 +46,7 @@ async def update_agent(agent_id: int, update_data: Agent,user: Customer = Depend
         else:
             raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
-    # The update is empty, but we should still return the matching document if it exists.
+    
     if (existing_agent := await collections["agents"].find_one({"_id": ObjectId(agent_id)})) is not None:
         return existing_agent
 
