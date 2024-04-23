@@ -50,7 +50,7 @@ app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
 
 @app.get("/api/healthchecker")
 def root():
-    return {"message": "Welcome to 2FA Authentication with FastAPI"}
+    return {"message": "Welcome to Stocks & Crypto Management System"}
 
 # @app.on_event("startup")
 # async def startup_event():

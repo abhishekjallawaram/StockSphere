@@ -1,27 +1,26 @@
 from pymongo import MongoClient
 
-# Connect to MongoDB - Replace 'localhost' and '27017' with your MongoDB host and port if different
+
 client = MongoClient('mongodb://localhost:27017/')
 
-# Assuming your database name is 'mydatabase'
+
 db = client['stocksphere']  
 
-# Define the MongoDB aggregation pipeline for top agents
 pipeline = [
     {
         "$lookup": {
-            "from": "stocks",  # Assuming this is the name of your stocks collection
+            "from": "stocks",  
             "localField": "ticket",
-            "foreignField": "Company_ticker",  # Matching ticket to Company_ticker
+            "foreignField": "Company_ticker", 
             "as": "stock_info"
         }
     },
-    {"$unwind": "$stock_info"},  # Unwind the resulting array to simplify processing
+    {"$unwind": "$stock_info"},  
     {
         "$lookup": {
-            "from": "agents",  # The actual name of your agents collection
+            "from": "agents",  
             "localField": "agent_id",
-            "foreignField": "agent_id",  # Match agent_id from Transaction to Agent
+            "foreignField": "agent_id",  
             "as": "agent_info"
         }
     },
