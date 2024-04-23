@@ -64,10 +64,10 @@ class CreateStockRequest(BaseModel):
 class CustomerRequenst(BaseModel):
     username: str
     email: EmailStr
-    hashed_password: str
+    hashed_password: Optional[str] = None
     balance: Optional[float] = Field(None, description="Account Balance")
     role: str = Field(default="customer", description="The role of the user") 
-    # net_stock: float = Field(default=0.0, description="Stock worth")
+    net_stock: float = Field(default=0.0, description="Stock worth")
     
     class Config:
         arbitrary_types_allowed = True
@@ -99,6 +99,37 @@ class CustomerResponse(BaseModel):
 class TransactionRequest(BaseModel):
     # transaction_id: conint(ge=0, le=999999)
     # customer_id: conint(ge=0, le=999999)
+    stock_id: Optional[conint(ge=0, le=999999)]
+    crypto_id: Optional[conint(ge=0, le=999999)] 
+    agent_id: conint(ge=0, le=999999)
+    ticket: str
+    volume: int
+    each_cost:float
+    action: str  # constrains the string to either 'buy' or 'sell'
+    
+    @validator('action')
+    def check_action(cls, v):
+        if v not in ['buy', 'sell']:
+            raise ValueError('Action must be "buy" or "sell"')
+        return v
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: lambda o: str(o)}
+        schema_extra = {
+            "example": {
+                "customer_id": "1",
+                "stock_id": "1",
+                "agent_id": "1",
+                "ticket": "GOOGL",
+                "volume": 100,
+                "action": "buy",
+                "date": "2024-03-26T12:00:00Z"
+            }
+        }
+class TransactionAdminRequest(BaseModel):
+    # transaction_id: conint(ge=0, le=999999)
+    customer_id: conint(ge=0, le=999999)
     stock_id: conint(ge=0, le=999999)
     agent_id: conint(ge=0, le=999999)
     ticket: str
