@@ -1,4 +1,4 @@
-import React, { useState , useContext} from 'react';
+import  { useState } from 'react';
 
 import ErrorMessage from '@/components/ErrorMessage';
 // import { Icons } from "@/components/ui/icons";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useLocalState } from '@/utils/usingLocalStorage';
+import { ModeToggle } from '@/components/mode-toggle';
 
 
 
@@ -46,9 +47,10 @@ function Login() {
           console.log(data.access_token)
           localStorage.setItem("awesomeLeadsToken", data.access_token);
           setJwt(data.access_token);
-          window.location.href="dashboard";
+          window.location.href="stockdashboard";
 
         }
+        
       };
     
       const handleSubmit = (e) => {
@@ -57,10 +59,15 @@ function Login() {
       };
 
     // const[jwt, setJwt]= useLocalState("","jwt");
+
+    
     return (
-        <div className='h-screen flex justify-center items-center'>
-      <Card className='w-[460px] mx-auto'>
+        <div className='h-screen flex justify-center items-center  bg-gray-100 shadow-md  dark:bg-gray-900 '>
+      <Card className='w-[460px] mx-auto  dark:text-white'>
+      
+
       <CardHeader className="space-y-1">
+      <ModeToggle/>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
           Enter your username and password below to Login

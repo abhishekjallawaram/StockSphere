@@ -80,19 +80,32 @@ class StockData(BaseModel):
 
 
 
+# class Transaction(BaseModel):
+#     transaction_id: conint(ge=0, le=999999)
+#     customer_id: conint(ge=0, le=999999)
+#     stock_id: conint(ge=0, le=999999)
+#     crypto_id: conint(ge=0, le=999999)
+#     agent_id: conint(ge=0, le=999999)
+#     ticket: str
+#     volume: int
+#     each_cost:float
+#     crypto_id: Optional[int] = Field(None, description="The crypto ID if applicable")
+
+#     action: str  # constrains the string to either 'buy' or 'sell'
+#     date: datetime = Field(default_factory=datetime.now)
+    
+
 class Transaction(BaseModel):
     transaction_id: conint(ge=0, le=999999)
     customer_id: conint(ge=0, le=999999)
-    stock_id: conint(ge=0, le=999999)
-    crypto_id: conint(ge=0, le=999999)
+    stock_id: Optional[conint(ge=0, le=999999)]
+    crypto_id: Optional[conint(ge=0, le=999999)] 
     agent_id: conint(ge=0, le=999999)
     ticket: str
     volume: int
-    each_cost:float
-
+    each_cost: float
     action: str  # constrains the string to either 'buy' or 'sell'
     date: datetime = Field(default_factory=datetime.now)
-    
     @validator('action')
     def check_action(cls, v):
         if v not in ['buy', 'sell']:
@@ -113,6 +126,7 @@ class Transaction(BaseModel):
                 "date": "2024-03-26T12:00:00Z"
             }
         }
+
 
 class Crypto(BaseModel):
     crypto_id: conint(ge=0, le=999999)

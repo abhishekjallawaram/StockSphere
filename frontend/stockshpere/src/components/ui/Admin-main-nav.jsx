@@ -1,31 +1,44 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Assuming you're using React Router for navigation
+import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils'; 
 import { ModeToggle } from '../mode-toggle';
 
-// Ensure this utility function is correctly imported
-
-// MainNav Functional Component
 export function AdminMainNav({ className, ...props }) {
   
   return (
     <nav className={cn('flex items-center space-x-4 lg:space-x-6', className)} {...props}>
       <ModeToggle/>
-      <Link to="/admin/dashboard" className="text-sm font-medium transition-colors hover:text-primary  ">
+      <NavLink 
+        to="/admin/transactions" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
         Transactions
-      </Link>
-      <Link to="/admin/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+      </NavLink>
+      <NavLink 
+        to="/admin/customers" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
         Customers
-      </Link>
-      <Link to="/admin/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary ">
-        Stock Analysis
-      </Link>
-      <Link to="/admin/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary ">
+      </NavLink>
+      <NavLink 
+        to="/admin/stocks" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Stock Data
+      </NavLink>
+      <NavLink 
+        to="/admin/crypto" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
         Crypto Data
-      </Link>
-
-      <h1 className='pl-12 text-2xl font-bold'>Admin Dashboard</h1>
-  
+      </NavLink>
+      <NavLink 
+        to="/admin/agent" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Agent Data
+      </NavLink>
+      <h1 className='pl-32 text-2xl font-bold'>Admin Dashboard</h1>
     </nav>
   );
 }

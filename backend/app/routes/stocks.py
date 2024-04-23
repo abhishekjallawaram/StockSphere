@@ -108,17 +108,22 @@ async def update_stock_by_ticker(ytic: str, update_data: CreateStockRequest,user
         raise HTTPException(status_code=404, detail="Stock with given ticker not found")
 
 
-@router.delete("/{stockid}", response_model=dict)
-async def delete_stock(stockid: int,user: Customer = Depends(authutils.get_current_admin)):
-    collections = await get_collections()
-    delete_result = await collections["stocks"].delete_one({"stock_id": stockid})
+    
+from pydantic import BaseModel
+class stocksDeleteRequest(BaseModel):
+    stocks_ids: List[int]
+    
+    
 
-    if delete_result.deleted_count == 1:
-        return {"message": "Stock deleted successfully"}
-    else:
-        raise HTTPException(status_code=404, detail="Stock not found")
-    
-    
+@router.delete("/admin", response_model=dict)
+async def delete_stock(delete_request: stocksDeleteRequest ,user: Customer = Depends(authutils.get_current_admin)):
+    stocks_ids = delete_request.stocks_ids
+    collections = await get_collections()
+    delete_result = await collections["stocks"].delete_many({"stock_id": {"$in": stocks_ids}})
+    if delete_result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="No stocks found to delete")
+    return {"message": f"{delete_result.deleted_count} stocks deleted successfully"}
+
 
 @router.delete("/{ytic}", response_model=dict)
 async def delete_stock_by_ticker(ytic: str,user: Customer = Depends(authutils.get_current_admin)):
@@ -129,3 +134,21 @@ async def delete_stock_by_ticker(ytic: str,user: Customer = Depends(authutils.ge
         return {"message": "Stock with ticker '{}' deleted successfully".format(ytic)}
     else:
         raise HTTPException(status_code=404, detail="Stock with given ticker not found")
+    
+    
+    
+
+
+# class TransactionDeleteRequest(BaseModel):
+#     transaction_ids: List[int]
+      
+
+# @router.delete("/admin", response_model=dict, status_code=status.HTTP_200_OK)
+# async def delete_transaction(delete_request: TransactionDeleteRequest ,user: Customer = Depends(authutils.get_current_admin)):
+#     transaction_ids = delete_request.transaction_ids
+#     collections = await get_collections()
+#     delete_result = await collections["transactions"].delete_many({"transaction_id": {"$in": transaction_ids}})
+
+#     if delete_result.deleted_count == 0:
+#         raise HTTPException(status_code=404, detail="No transactions found to delete")
+#     return {"message": f"{delete_result.deleted_count} transactions deleted successfully"}
