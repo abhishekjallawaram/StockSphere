@@ -35,7 +35,7 @@ function Dashboard() {
         setStocks(formattedstocks);
     }, []);
     useFetchDataWithSetter({
-        url: 'http://localhost:8000/api/stocks/',
+        url: 'http://localhost:8000/api/cryptocurrencies/',
         method: 'GET',
         jwt,
         setData: handleSetStockData
@@ -75,11 +75,11 @@ function Dashboard() {
 
     const handleBuy = async () => {
         const transactionData = {
-            stock_id: selectedStock.value,
-            crypto_id: 0,
-            agent_id: selectedAgent.value,
+            crypto_id: selectedStock.value, 
+            stock_id: 0,
+            agent_id: selectedAgent.value, 
             ticket: selectedStock.label,
-            volume: volume,
+            volume: volume, 
             each_cost: selectedStock.cp,
             action: selectedAction.label
         };
@@ -129,26 +129,27 @@ function Dashboard() {
                     <div className='flex flex-row'>
 
                         <GenericTable
-                            url="http://localhost:8000/api/stocks/"
-                            title="Stocks"
+                            url="http://localhost:8000/api/cryptocurrencies/"
+                            title="Crypto"
                             columnDefs={[
-                                { field: "Company_name" },
-                                { field: "Company_ticker" },
-                                { field: "Closed_price" },
-                                { field: "Company_cash_flow" },
-                                { field: "Company_dividend" },
-                                { field: "Company_PE" },
+                                { field: "Name" },
+                                { field: "Symbol" },
+                                { field: "Last_Close" },
+                                { field: "Market_Cap" },
+                                { field: "Volume_24h" },
+                                { field: "Circulating_Supply" }
+
                             ]}
-                            height={560}  
-                            width={740}  
+                            height={540}  
+                            width={640}  
                             pagination='true'
                         />
 
-                        <Card className="justify-center h-[550px] w-[320px] my-32 mx-24 dark:text-white" >
+                        <Card className="justify-center h-[550px] w-[320px] my-32 mx-16 dark:text-white" >
 
 
                             <CardHeader className="space-y-1">
-                                <CardTitle className="text-2xl">Trade Stocks</CardTitle>
+                                <CardTitle className="text-2xl">Trade Crypto</CardTitle>
                                 <CardDescription>
                                     Enter your detials to trade stocks
                                 </CardDescription>
@@ -156,8 +157,8 @@ function Dashboard() {
 
                             <CardContent as="form" className="grid gap-4">
 
-                                <Label htmlFor="stock">Stock</Label>
-                                <Select
+                                <Label htmlFor="stock">Crypto</Label>
+                                <Select 
                                     inputId="stock"
                                     value={selectedStock}
                                     onChange={handleSelectChangestock}
@@ -165,6 +166,7 @@ function Dashboard() {
                                     isClearable={true}
                                     isSearchable={true}
                                     placeholder="Select or type to search"
+                                    
                                 />
                                 <Label htmlFor="stock">Agent</Label>
                                 <Select
@@ -207,10 +209,10 @@ function Dashboard() {
                     <div className='flex flex-row '>
                         <div className='my'>
                             <GenericTable
-                                url='http://localhost:8000/api/transactions/customer-stocks'
+                                url='http://localhost:8000/api/transactions/customer-cryptos'
                                 title="Your Stocks"
                                 columnDefs={[
-                                    { field: "stock_ticket" },
+                                    { field: "crypto_ticket" },
                                     { field: "each_cost" },
                                     { field: "volume" },
 
@@ -224,7 +226,7 @@ function Dashboard() {
                         <div>
 
                             <GenericTable
-                                url="http://localhost:8000/api/transactions/customer/stocks"
+                                url="http://localhost:8000/api/transactions/customer/cryptos"
                                 title="transactions"
                                 columnDefs={[
                                     { field: "ticket" },
@@ -240,8 +242,6 @@ function Dashboard() {
                             />
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </>

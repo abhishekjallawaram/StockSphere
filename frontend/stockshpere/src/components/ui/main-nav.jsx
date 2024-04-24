@@ -1,28 +1,37 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; // Assuming you're using React Router for navigation
+
+import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils'; 
 import { ModeToggle } from '../mode-toggle';
 
-// Ensure this utility function is correctly imported
-
-// MainNav Functional Component
+// eslint-disable-next-line react/prop-types
 export function MainNav({ className, ...props }) {
-  
   return (
     <nav className={cn('flex items-center space-x-4 lg:space-x-6', className)} {...props}>
-      <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
-        Dashboard
-      </Link>
-      <Link to="/examples/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Customers
-      </Link>
-      <Link to="/stockanalysis" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Stock Analyze
-      </Link>
-      <Link to="/examples/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-        Settings
-      </Link>
       <ModeToggle/>
+      <NavLink 
+        to="/stockdashboard" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Stocks
+      </NavLink>
+      <NavLink 
+        to="/stockanalysis" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Stock Analysis
+      </NavLink>
+      <NavLink 
+        to="/cryptodashboard" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Crypto
+      </NavLink>
+      <NavLink 
+        to="/cryptoanalysis" 
+        className={({ isActive }) => isActive ? "text-sm font-medium transition-colors text-primary" : "text-sm font-medium transition-colors text-muted-foreground"}
+      >
+        Crypto Analysis
+      </NavLink>
     </nav>
   );
 }

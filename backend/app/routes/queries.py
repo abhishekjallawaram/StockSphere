@@ -15,35 +15,7 @@ from app.utils import authutils
 from fastapi import APIRouter, HTTPException, Request,Depends
 from app.routes.schemas import CustomerInfo, AgentInfo, CustomerTransactionInfo
 from app.database.mongo import get_top_customers, get_top_agents, get_customers_most_transactions
-<<<<<<< Updated upstream
-
-
-router = APIRouter()
-
-@router.get("/query1-output/", response_model=list[CustomerInfo])
-async def fetch_customer_data(limit: int = Query(5, title="Limit", description="Number of results to return", ge=5, le=20)):
-    result = await get_top_customers(limit)
-    return result
-
-@router.get("/query2-output/", response_model=list[AgentInfo])
-async def fetch_top_agents(limit: int = Query(5, title="Limit", description="Number of results to return", ge=5, le=20)):
-    try:
-        agents = await get_top_agents(limit)
-        return agents
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/customers/most-transactions/", response_model=list[CustomerTransactionInfo])
-async def fetch_customers_most_transactions(limit: int = Query(5, title="Limit", description="Number of results to return", ge=5, le=20)):
-    try:
-        customers = await get_customers_most_transactions(limit)
-        return customers
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-=======
 from collections import defaultdict 
-
-router = APIRouter()
 
     
 from typing import List, Optional
@@ -59,6 +31,7 @@ class CustomerTransactionDetail(BaseModel):
     agent_level: Optional[str]
 
 
+
 @router.get("/customers/most-stock-transactions", response_model=List[CustomerTransactionDetail], summary="Retrieve Top 10 Stock Customers Transactions")
 async def get_customers_with_most_stock_transactions(user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
@@ -67,6 +40,7 @@ async def get_customers_with_most_stock_transactions(user: Customer = Depends(au
     agent_ids = {t["agent_id"] for t in transactions if "agent_id" in t}
     customers = {c["customer_id"]: c for c in await collections["customers"].find({"customer_id": {"$in": list(customer_ids)}}).to_list(length=None)}
     agents = {a["agent_id"]: a for a in await collections["agents"].find({"agent_id": {"$in": list(agent_ids)}}).to_list(length=None)}
+
     customer_aggregates = {}
     for transaction in transactions:
         customer_id = transaction.get("customer_id")
@@ -78,10 +52,12 @@ async def get_customers_with_most_stock_transactions(user: Customer = Depends(au
                     "agent_info": agents.get(transaction.get("agent_id"))
                 }
             customer_aggregates[customer_id]["total_transactions"] += 1
+
     sorted_customers = sorted(customer_aggregates.items(), key=lambda x: x[1]["total_transactions"], reverse=True)[:10]    
     results = [
         CustomerTransactionDetail(
             customer_id=(key),  
+
             username=val["customer_info"]["username"] if val["customer_info"] else None,
             email=val["customer_info"]["email"] if val["customer_info"] else None,
             total_transactions=val["total_transactions"],
@@ -97,12 +73,14 @@ class AgentTransactionDetail(BaseModel):
     agent_level: Optional[str]
     total_cost: float
 
+
 @router.get("/agents/top-stock-transactions", response_model=List[AgentTransactionDetail], summary="Retrieve Top 10 Stock Customers")
 async def get_agents_with_top_stock_transactions(user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
     transactions = await collections["transactions"].find({"crypto_id": {"$eq": 0}}).to_list(length=None) 
     agent_ids = {t["agent_id"] for t in transactions if "agent_id" in t}
     agents = {a["agent_id"]: a for a in await collections["agents"].find({"agent_id": {"$in": list(agent_ids)}}).to_list(length=None)}
+
     agent_totals = {}
     for transaction in transactions:
         agent_id = transaction.get("agent_id")
@@ -117,8 +95,10 @@ async def get_agents_with_top_stock_transactions(user: Customer = Depends(authut
             action = transaction.get("action", "")
             multiplier = 1 if action == "buy" else -1
             total_cost_contribution = volume * each_cost * multiplier
+
             agent_totals[agent_id]['total_cost'] += total_cost_contribution
     sorted_agents = sorted(agent_totals.items(), key=lambda x: x[1]["total_cost"], reverse=True)[:10]
+
     results = [
         AgentTransactionDetail(
             agent_id=(agent_id),
@@ -138,6 +118,7 @@ class CustomerStockTransactionDetail(BaseModel):
     agent_name: Optional[str]
     agent_level: Optional[str]
 
+
 @router.get("/customers/top-stock-transactions", response_model=List[CustomerStockTransactionDetail], summary="Retrieve Top 10 Stock Customers")
 async def get_customers_with_top_stock_transactions(user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
@@ -146,10 +127,12 @@ async def get_customers_with_top_stock_transactions(user: Customer = Depends(aut
     customers_dict = {customer['customer_id']: customer for customer in await collections["customers"].find().to_list(length=None)}
     agents_dict = {agent['agent_id']: agent for agent in await collections["agents"].find().to_list(length=None)}
     customer_aggregates = {}
+
     for transaction in transactions:
         stock_info = stocks_dict.get(transaction.get('ticket'))
         customer_info = customers_dict.get(transaction.get('customer_id'))
         agent_info = agents_dict.get(transaction.get('agent_id'))
+
         if customer_info and agent_info:
             customer_id = transaction['customer_id']
             if customer_id not in customer_aggregates:
@@ -158,13 +141,16 @@ async def get_customers_with_top_stock_transactions(user: Customer = Depends(aut
                     'customer_info': customer_info,
                     'agent_info': agent_info
                 }
+
             volume = transaction.get('volume', 0)
             each_cost = transaction.get('each_cost', 0)
             action_multiplier = 1 if transaction.get('action') == 'buy' else -1
             total_cost = volume * each_cost * action_multiplier
+
             customer_aggregates[customer_id]['total_cost'] += total_cost
     limit = 10
     sorted_customers = sorted(customer_aggregates.items(), key=lambda x: x[1]['total_cost'], reverse=True)[:limit]
+
     results = [
         CustomerStockTransactionDetail(
             customer_id=(cust_id),
@@ -185,6 +171,7 @@ class CustomerCryptoTransactionDetail(BaseModel):
     total_cost: float
     agent_name: Optional[str]
     agent_level: Optional[str]
+
 
 @router.get("/customers/top-crypto-transactions", response_model=List[CustomerCryptoTransactionDetail], summary="Retrieve Top 10 Crypto Customers Transactions")
 async def get_customers_with_top_crypto_transactions(user: Customer = Depends(authutils.get_current_admin)):
@@ -210,6 +197,7 @@ async def get_customers_with_top_crypto_transactions(user: Customer = Depends(au
             each_cost = transaction.get('each_cost', 0)
             action_multiplier = 1 if transaction.get('action') == 'buy' else -1
             total_cost = volume * each_cost * action_multiplier
+
             customer_aggregates[customer_id]['total_cost'] += total_cost
     limit = 10
     sorted_customers = sorted(customer_aggregates.items(), key=lambda x: x[1]['total_cost'], reverse=True)[:limit]
@@ -230,6 +218,7 @@ class AgentCryptoTransactionDetail(BaseModel):
     agent_name: Optional[str]
     agent_level: Optional[str]
     total_cost: float
+
 
 @router.get("/agents/top-crypto-transactions", response_model=List[AgentCryptoTransactionDetail],summary="Retrieve Top 10 Crypto Agents")
 async def get_agents_with_top_crypto_transactions(user: Customer = Depends(authutils.get_current_admin)):
@@ -272,6 +261,7 @@ class CustomerCryptoTransactionCount(BaseModel):
     total_transactions: int
     agent_name: Optional[str]
     agent_level: Optional[str]
+
 @router.get("/customers/most-crypto-transactions", response_model=List[CustomerCryptoTransactionCount],summary="Retrieve Top 10 Crypto Customers")
 async def get_customers_with_most_crypto_transactions(user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
@@ -833,4 +823,5 @@ async def get_customers_with_top_stock_transactions_by_ticker(Symbol: str, user:
         ) for cust_id, cust in sorted_customers
     ]
     return results
->>>>>>> Stashed changes
+
+

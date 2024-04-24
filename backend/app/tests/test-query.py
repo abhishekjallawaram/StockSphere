@@ -198,8 +198,6 @@ for transaction in transactions:
     customer_info = customers_dict.get(transaction.get('customer_id'))
     
     agent_info = agents_dict.get(transaction.get('agent_id'))
-
-   
     if customer_info and agent_info:
         customer_id = transaction['customer_id']
         if customer_id not in customer_aggregates:
@@ -221,6 +219,8 @@ for transaction in transactions:
 sorted_customers = sorted(customer_aggregates.items(), key=lambda x: x[1]['total_cost'], reverse=True)[:limit]
 
 
+
+
 results = [{
     'customer_id': cust_id,
     'username': cust['customer_info']['username'],
@@ -232,9 +232,9 @@ results = [{
 
 for result in results:
     print(result)
-    
 
-##############
+
+
 
 print("\n\n\n")
 

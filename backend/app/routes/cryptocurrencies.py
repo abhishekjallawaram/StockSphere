@@ -10,13 +10,21 @@ from bson import ObjectId
 from pymongo.collection import ReturnDocument
 from app.utils import authutils
 from fastapi import APIRouter, Request, Depends
+
+
+
+
 router = APIRouter()
+
+
 
 @router.get("/", response_model=List[Crypto])
 async def get_cryptos(user: Customer = Depends(authutils.get_current_user)):
     collections = await get_collections()
     cryptos = await collections["cryptocurrencies"].find().to_list(length=100)
     return cryptos
+
+
 
 @router.post("/", response_model=Crypto)
 async def create_crypto(crypto: CreateCryptoRequest, user: Customer = Depends(authutils.get_current_admin)):
@@ -31,6 +39,8 @@ async def create_crypto(crypto: CreateCryptoRequest, user: Customer = Depends(au
     created_crypto = await collections["cryptocurrencies"].find_one({"_id": result.inserted_id})
     return created_crypto
 
+
+
 @router.get("/{cryptoid}", response_model=Crypto)
 async def read_crypto_byid(cryptoid: int, user: Customer = Depends(authutils.get_current_user)):
     collections = await get_collections()
@@ -38,6 +48,8 @@ async def read_crypto_byid(cryptoid: int, user: Customer = Depends(authutils.get
     if item:
         return Crypto(**item)
     raise HTTPException(status_code=404, detail="Item not found")
+
+
 
 @router.post("/{ytic}", response_model=Crypto)
 async def create_crypto_by_ticker(ytic: str, user: Customer = Depends(authutils.get_current_admin)):
@@ -65,6 +77,8 @@ async def create_crypto_by_ticker(ytic: str, user: Customer = Depends(authutils.
     created_crypto = Crypto(**crypto_data.dict(), id=result.inserted_id)
     return created_crypto
 
+
+
 @router.put("/{cryptoid}", response_model=Crypto)
 async def update_crypto(cryptoid: int, update_data: CreateCryptoRequest, user: Customer = Depends(authutils.get_current_admin)):
     collections = await get_collections()
@@ -78,6 +92,8 @@ async def update_crypto(cryptoid: int, update_data: CreateCryptoRequest, user: C
         return Crypto(**updated_crypto)
     else:
         raise HTTPException(status_code=404, detail="Crypto not found")
+
+
 
 @router.put("/{ytic}", response_model=Crypto)
 async def update_crypto_by_ticker(ytic: str, update_data: CreateCryptoRequest, user: Customer = Depends(authutils.get_current_admin)):
@@ -93,15 +109,33 @@ async def update_crypto_by_ticker(ytic: str, update_data: CreateCryptoRequest, u
     else:
         raise HTTPException(status_code=404, detail="Crypto with given ticker not found")
 
-@router.delete("/{cryptoid}", response_model=dict)
-async def delete_crypto(cryptoid: int, user: Customer = Depends(authutils.get_current_admin)):
-    collections = await get_collections()
-    delete_result = await collections["cryptocurrencies"].delete_one({"crypto_id": cryptoid})
+from pydantic import BaseModel
+class cryptoDeleteRequest(BaseModel):
+    crypto_ids: List[int]
+    
+    
 
-    if delete_result.deleted_count == 1:
-        return {"message": "Crypto deleted successfully"}
-    else:
-        raise HTTPException(status_code=404, detail="Crypto not found")
+@router.delete("/admin", response_model=dict)
+async def delete_crypto(delete_request: cryptoDeleteRequest ,user: Customer = Depends(authutils.get_current_admin)):
+    crypto_ids = delete_request.crypto_ids
+    collections = await get_collections()
+    delete_result = await collections["cryptocurrencies"].delete_many({"crypto_id": {"$in": crypto_ids}})
+    if delete_result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="No crypto found to delete")
+    return {"message": f"{delete_result.deleted_count} crypto deleted successfully"}
+
+
+# @router.delete("/admin", response_model=dict)
+# async def delete_crypto(cryptoid: int, user: Customer = Depends(authutils.get_current_admin)):
+#     collections = await get_collections()
+#     delete_result = await collections["cryptocurrencies"].delete_one({"crypto_id": cryptoid})
+
+#     if delete_result.deleted_count == 1:
+#         return {"message": "Crypto deleted successfully"}
+#     else:
+#         raise HTTPException(status_code=404, detail="Crypto not found")
+
+
 
 @router.delete("/{ytic}", response_model=dict)
 async def delete_crypto_by_ticker(ytic: str, user: Customer = Depends(authutils.get_current_admin)):

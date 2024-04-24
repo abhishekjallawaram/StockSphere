@@ -33,37 +33,33 @@ async def create_stockdata(stockdata: StockData,user: Customer = Depends(authuti
         raise HTTPException(status_code=404, detail="The created stock data was not found")
     return StockData(**created_stock)
 
+from pydantic import BaseModel, Field
 
-# @router.get("/{ytic}", response_model=List[StockData])
-# async def create_batch_items(tickers: str):
-#     collections = await get_collections()
-#     results = []
+class StockDataRangeRequest(BaseModel):
+    company_ticker: str = Field(..., description="The stock ticker of the company")
+    start_date: str = Field(..., description="Start date in YYYY-MM-DD format")
+    end_date: str = Field(..., description="End date in YYYY-MM-DD format")
     
-#     for ytic in tickers:
-#         existing_stock = await collections["stock_history"].find_one({'Company_ticker': ytic})
-#         if existing_stock:
-#             results.append(StockData(**existing_stock))
-#             continue
+    
 
-#         try:
-#             comp = yf.Ticker(ytic)
-#             if "longName" not in comp.info:
-#                 raise HTTPException(status_code=404, detail="Yahoo Finance ticker not found")
-#         except Exception as e:
-#             raise HTTPException(status_code=400, detail=str(e))
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, Query, Body
+@router.post("/range", response_model=List[StockData])
+async def get_stocks_data_in_range(
+    request_body: StockDataRangeRequest = Body(..., description="Request body with company ticker, start date, and end date")
+):
+    start_date_obj = datetime.strptime(request_body.start_date, '%Y-%m-%d')
+    end_date_obj = datetime.strptime(request_body.end_date, '%Y-%m-%d')
 
-#         stock_data = {
-#             'Company_name': comp.info['longName'],
-#             'Company_ticker': comp.info['symbol'],
-#             'Closed_price': comp.info['previousClose'],
-#             'Company_info': comp.info['longBusinessSummary'],
-#             'Company_PE': comp.info.get('trailingPE', None),
-#             'Company_cash_flow': comp.info.get('operatingCashflow', None),
-#             'Company_dividend': comp.info.get('dividendRate', None)
-#         }
+    collections = await get_collections()
 
-#         result = await collections["stock_history"].insert_one(stock_data)
-#         created_stock = await collections["stock_history"].find_one({"_id": result.inserted_id})
-#         results.append(StockData(**created_stock))
+    query = {
+        "Company_ticker": request_body.company_ticker,
+        "date": {
+            "$gte": start_date_obj.strftime('%Y-%m-%d'),
+            "$lte": end_date_obj.strftime('%Y-%m-%d')
+        }
+    }
+    stocks = await collections["stock_history"].find(query).sort("date", 1).to_list(length=None) 
+    return stocks
 
-#     return results
