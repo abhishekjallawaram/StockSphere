@@ -33,3 +33,4 @@ backend/routes/__pycache__
 /backend/app/utils/__pycache__
 /backend/app/scripts/__pycache__
 backend/app/scripts/__pycache__/generate_data.cpython-312.pyc
+backend/app/ML/__pycache__/predict.cpython-312.pyc
