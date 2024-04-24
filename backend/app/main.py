@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.routes import agents, customers, stocks, stock_history, transactions, crypto_history, cryptocurrencies, queries
+from app.ML import predict
 from app.database.mongo import MongoDB
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils import yahoo_finance, yahoo_finance_crypto
@@ -33,7 +34,8 @@ app.include_router(stock_history.router, prefix="/api/stock-history", tags=["sto
 app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
 app.include_router(cryptocurrencies.router, prefix="/api/cryptocurrencies", tags=["cryptocurrencies"])
 app.include_router(crypto_history.router, prefix="/api/crypto_history", tags=["crypto_history"])
-app.include_router(queries.router, prefix="/api/queries", tags=["queries"])
+app.include_router(queries.router, prefix="/api/queries", tags=["Queries"])
+app.include_router(predict.router, prefix="/api/predict", tags=["ML-Model"])
 
 
 app.add_middleware(

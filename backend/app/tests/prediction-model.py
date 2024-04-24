@@ -58,12 +58,18 @@ def plot_predictions(dates, actual, predicted, symbol, pdf):
     plt.close()
 
 def main():
-    symbols = ['AAPL', 'MSFT', 'AMZN', 'GOOGL']
+    symbols = [
+    'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'BRK-B', 'JNJ', 'V', 'PG', 'JPM',
+    'TSLA', 'NVDA', 'DIS', 'NFLX', 'PFE', 'KO', 'NKE', 'XOM', 'CVX', 'CSCO',
+    'INTC', 'WMT', 'T', 'VZ', 'UNH', 'HD', 'MCD', 'BA', 'MMM', 'CAT',
+    'GS', 'IBM', 'MRK', 'GE', 'F', 'GM', 'ADBE', 'CRM', 'ORCL', 'ABT',
+    'BAC', 'C', 'GILD', 'LLY', 'MDT', 'AMGN', 'MO', 'PEP', 'TMO', 'DHR'
+]
     start_date = '2010-01-01'
     end_date = '2024-01-01'
     data = fetch_data(symbols, start_date, end_date)
 
-    with PdfPages('predictions_for_2023.pdf') as pdf:
+    with PdfPages('predictions.pdf') as pdf:
         for symbol in symbols:
             print(f"Processing {symbol}...")
             data_symbol = data[data['Symbol'] == symbol]
