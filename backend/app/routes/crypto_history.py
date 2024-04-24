@@ -47,7 +47,7 @@ async def get_stocks_data_in_range(
     collections = await get_collections()
 
     query = {
-        "Company_ticker": request_body.company_ticker,
+        "Symbol": request_body.company_ticker,
         "date": {
             "$gte": start_date_obj.strftime('%Y-%m-%d'),
             "$lte": end_date_obj.strftime('%Y-%m-%d')
@@ -55,3 +55,34 @@ async def get_stocks_data_in_range(
     }
     stocks = await collections["crypto_history"].find(query).sort("date", 1).to_list(length=None) 
     return stocks
+
+
+@router.put("/{crypto_id}", response_model=CryptoData)
+async def update_crypto_data(
+    crypto_id: str,
+    cryptodata: CryptoData,
+    user: Customer = Depends(authutils.get_current_user)
+):
+    collections = await get_collections()
+    updated_crypto = await collections["crypto_history"].find_one_and_update(
+        {"_id": ObjectId(crypto_id)},
+        {"$set": cryptodata.dict(by_alias=True)},
+        return_document=ReturnDocument.AFTER
+    )
+    if updated_crypto is None:
+        raise HTTPException(status_code=404, detail="Crypto data not found")
+    return CryptoData(**updated_crypto)
+
+
+@router.delete("/{crypto_id}")
+async def delete_crypto_data(
+    crypto_id: str,
+    user: Customer = Depends(authutils.get_current_user)
+):
+    collections = await get_collections()
+    deleted_crypto = await collections["crypto_history"].find_one_and_delete(
+        {"_id": ObjectId(crypto_id)}
+    )
+    if deleted_crypto is None:
+        raise HTTPException(status_code=404, detail="Crypto data not found")
+    return {"message": "Crypto data deleted successfully"}

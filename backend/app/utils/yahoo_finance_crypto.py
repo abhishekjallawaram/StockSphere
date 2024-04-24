@@ -56,6 +56,8 @@ crypto_symbols = [
 ]
 
 async def fetch_and_update_crypto_data():
+    
+    
     for symbol in crypto_symbols:
         try:
             crypto = yf.Ticker(symbol)
@@ -75,13 +77,15 @@ async def fetch_and_update_crypto_data():
             print(f"Error updating crypto {symbol}: {e}")
 
 async def fetch_and_store_historical_data():
+    
+    today = datetime.today().strftime('%Y-%m-%d')
     if await crypto_history_collection.count_documents({}) > 0:
         print("The collection already contains data. No action taken.")
         pass
     else:
         for symbol in crypto_symbols:
             try:
-                hist = yf.download(symbol, start='2023-01-01', end='2024-01-01')
+                hist = yf.download(symbol, start='2023-01-01', end=today)
                 if not hist.empty:
                     hist.reset_index(inplace=True)
                     records = hist.to_dict('records')

@@ -63,3 +63,32 @@ async def get_stocks_data_in_range(
     stocks = await collections["stock_history"].find(query).sort("date", 1).to_list(length=None) 
     return stocks
 
+@router.put("/{stock_id}", response_model=StockData)
+async def update_stockdata(
+    stock_id: str,
+    stockdata: StockData,
+    user: Customer = Depends(authutils.get_current_user)
+):
+    collections = await get_collections()
+    updated_stock = await collections["stock_history"].find_one_and_update(
+        {"_id": ObjectId(stock_id)},
+        {"$set": stockdata.dict(by_alias=True)},
+        return_document=ReturnDocument.AFTER
+    )
+    if updated_stock is None:
+        raise HTTPException(status_code=404, detail="Stock data not found")
+    return StockData(**updated_stock)
+
+
+@router.delete("/{stock_id}")
+async def delete_stockdata(
+    stock_id: str,
+    user: Customer = Depends(authutils.get_current_user)
+):
+    collections = await get_collections()
+    deleted_stock = await collections["stock_history"].find_one_and_delete(
+        {"_id": ObjectId(stock_id)}
+    )
+    if deleted_stock is None:
+        raise HTTPException(status_code=404, detail="Stock data not found")
+    return {"message": "Stock data deleted successfully"}

@@ -78,6 +78,7 @@ async def fetch_and_update_stock_data():
 
 
 async def fetch_and_store_historical_data():
+    today = datetime.today().strftime('%Y-%m-%d')
     
     if await stock_history_collection.count_documents({}) > 0:
         print("The collection already contains data. No action taken.")
@@ -86,7 +87,7 @@ async def fetch_and_store_historical_data():
         
         for symbol in ticker_symbols:
             try:
-                hist = yf.download(symbol, start='2023-01-01', end='2024-01-01')
+                hist = yf.download(symbol, start='2023-01-01', end=today)
 
                 if not hist.empty:
                     hist.reset_index(inplace=True)

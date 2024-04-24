@@ -292,8 +292,6 @@ async def get_customers_with_most_crypto_transactions(user: Customer = Depends(a
     ]
     return results
 
-########
-
 class CustomerStockTransactionCount(BaseModel):
     customer_id: int
     username: str | None
