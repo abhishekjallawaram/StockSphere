@@ -27,13 +27,13 @@ async def startup_event():
     asyncio.create_task(update_recent_data())
 
 
-app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
-app.include_router(customers.router, prefix="/api/customers", tags=["customers"])
-app.include_router(stocks.router, prefix="/api/stocks", tags=["stocks"])
-app.include_router(stock_history.router, prefix="/api/stock-history", tags=["stock-history"])
-app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
-app.include_router(cryptocurrencies.router, prefix="/api/cryptocurrencies", tags=["cryptocurrencies"])
-app.include_router(crypto_history.router, prefix="/api/crypto_history", tags=["crypto_history"])
+app.include_router(agents.router, prefix="/api/agents", tags=["Agents"])
+app.include_router(customers.router, prefix="/api/customers", tags=["Customers"])
+app.include_router(stocks.router, prefix="/api/stocks", tags=["Stocks"])
+app.include_router(stock_history.router, prefix="/api/stock-history", tags=["Stock-History"])
+app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
+app.include_router(cryptocurrencies.router, prefix="/api/cryptocurrencies", tags=["Cryptocurrencies"])
+app.include_router(crypto_history.router, prefix="/api/crypto_history", tags=["Crypto_History"])
 app.include_router(queries.router, prefix="/api/queries", tags=["Queries"])
 app.include_router(predict.router, prefix="/api/predict", tags=["ML-Model"])
 
