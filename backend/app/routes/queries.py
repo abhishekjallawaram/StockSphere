@@ -17,6 +17,7 @@ from app.routes.schemas import CustomerInfo, AgentInfo, CustomerTransactionInfo
 from app.database.mongo import get_top_customers, get_top_agents, get_customers_most_transactions
 from collections import defaultdict 
 
+router = APIRouter()
     
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
